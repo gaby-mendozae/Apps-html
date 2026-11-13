@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#087b43">
+<title>Simulador bancario · Prototipo educativo</title>
+<style>
+:root{
+  --green:#087b43;--green-dark:#075d35;--green-soft:#e9f5ee;
+  --ink:#1c2b23;--muted:#718078;--line:#e7ece8;--bg:#f3f6f4;
+  --white:#fff;--red:#c94b4b;--shadow:0 8px 24px rgba(22,52,35,.08)
+}
+*{box-sizing:border-box}
+body{margin:0;background:#e9eeeb;color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.phone{width:100%;max-width:430px;min-height:100dvh;margin:0 auto;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 0 45px #102b1b18}
+.status{height:28px;background:var(--green-dark);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:11px;letter-spacing:.2px}
+.app-header{background:var(--green);color:#fff;padding:14px 20px 20px;border-radius:0 0 22px 22px}
+.header-row{display:flex;align-items:center;justify-content:space-between}
+.greeting{font-size:13px;opacity:.88;margin:0 0 3px}
+.user-name{font-size:21px;font-weight:750;margin:0}
+.header-actions{display:flex;gap:10px}
+.circle-btn{border:1px solid #ffffff55;background:#ffffff18;color:#fff;width:39px;height:39px;border-radius:50%;display:grid;place-items:center;font-size:17px}
+.sim-banner{margin-top:13px;background:#ffffff20;border:1px solid #ffffff38;border-radius:9px;padding:7px 10px;font-size:10px;letter-spacing:.65px;font-weight:800;text-align:center}
+main{padding:18px 17px 100px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:19px 2px 11px}
+.section-head h2{font-size:16px;margin:0;font-weight:750}
+.text-btn{border:0;background:none;color:var(--green);font-weight:700;font-size:12px;padding:5px}
+.balance-card{margin-top:-2px;background:linear-gradient(135deg,#087b43,#075e36);color:#fff;border-radius:17px;padding:17px 18px;box-shadow:var(--shadow)}
+.card-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;opacity:.9}
+.balance-label{font-size:12px;margin:17px 0 4px;opacity:.9}
+.balance{font-size:30px;font-weight:800;letter-spacing:-.8px}
+.account-meta{display:flex;justify-content:space-between;align-items:center;margin-top:13px;font-size:11px;color:#e2f2e8}
+.eye{border:0;background:transparent;color:#fff;font-size:17px;padding:0}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.quick{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 4px 11px;text-align:center;min-height:83px;color:var(--ink);box-shadow:0 2px 8px #102b1b05}
+.quick .ico{width:35px;height:35px;border-radius:12px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:0 auto 7px;font-size:18px}
+.quick span:last-child{font-size:10px;font-weight:700}
+.account-row,.movement,.service-row{display:flex;align-items:center;gap:12px;background:#fff;padding:13px;border-bottom:1px solid var(--line)}
+.account-row:first-child,.movement:first-child{border-radius:13px 13px 0 0}
+.account-row:last-child,.movement:last-child{border-radius:0 0 13px 13px;border-bottom:0}
+.account-icon,.movement-icon{width:38px;height:38px;border-radius:12px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.row-copy{flex:1;min-width:0}
+.row-copy strong{display:block;font-size:12px}
+.row-copy small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.row-amount{font-size:12px;font-weight:750;white-space:nowrap}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.movement{padding:12px}
+.movement .row-copy strong{font-size:11px}
+.movement .row-copy small{font-size:10px}
+.amount-out{color:var(--ink)}.amount-in{color:var(--green)}
+.promo{background:#fff;border-radius:14px;padding:15px;display:flex;align-items:center;gap:12px;border:1px solid var(--line)}
+.promo-icon{width:43px;height:43px;border-radius:13px;background:#fff4df;color:#a66b0a;display:grid;place-items:center;font-size:20px}
+.promo p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.4}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,430px);height:73px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+.nav-item{border:0;background:none;color:#89958e;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;font-weight:650;min-width:57px}
+.nav-item .nav-ico{font-size:19px}
+.nav-item.active{color:var(--green)}
+.page-title{display:flex;align-items:center;gap:12px;margin:3px 0 17px}
+.back{border:0;background:#fff;border:1px solid var(--line);width:37px;height:37px;border-radius:11px;color:var(--green);font-size:18px}
+.page-title h1{font-size:20px;margin:0}
+.page-sub{font-size:11px;color:var(--muted);margin:5px 0 0}
+.action-list{display:grid;gap:9px}
+.action-card{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;text-align:left;color:var(--ink);width:100%}
+.action-card .account-icon{width:42px;height:42px}
+.action-card strong{font-size:12px;display:block}
+.action-card small{font-size:10px;color:var(--muted);display:block;margin-top:4px}
+.chev{margin-left:auto;color:#9aa69f;font-size:19px}
+.form-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:750;margin-bottom:7px}
+.field input,.field select{width:100%;border:1px solid #dce5de;border-radius:10px;padding:12px 11px;background:#fbfcfb;color:var(--ink);outline:none;font-size:13px}
+.field input:focus,.field select:focus{border-color:var(--green);box-shadow:0 0 0 3px #087b4312}
+.hint{font-size:10px;color:var(--muted);line-height:1.5;margin-top:6px}
+.primary{width:100%;border:0;border-radius:11px;background:var(--green);color:#fff;font-weight:750;padding:14px;font-size:13px}
+.primary:active{background:var(--green-dark)}
+.secondary{width:100%;border:1px solid var(--green);border-radius:11px;background:#fff;color:var(--green);font-weight:750;padding:12px;font-size:12px;margin-top:9px}
+.notice{background:#fff8e8;border:1px solid #f2e3bd;color:#78591e;padding:11px 12px;border-radius:10px;font-size:10px;line-height:1.5;margin-bottom:13px}
+.success{background:var(--green-soft);border:1px solid #cde7d6;color:var(--green-dark);padding:13px;border-radius:12px;font-size:12px;line-height:1.5}
+.detail-balance{text-align:center;padding:22px 12px;background:#fff;border-radius:15px;border:1px solid var(--line);margin-bottom:15px}
+.detail-balance small{color:var(--muted);font-size:11px}
+.detail-balance strong{display:block;font-size:27px;margin:5px}
+.detail-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+.detail-actions button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 4px;color:var(--green);font-size:10px;font-weight:700}
+.detail-actions span{display:block;font-size:17px;margin-bottom:5px}
+.card-visual{background:linear-gradient(130deg,#087b43,#063e29);color:#fff;border-radius:17px;padding:20px;min-height:190px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow)}
+.card-chip{width:34px;height:25px;border-radius:6px;background:linear-gradient(135deg,#e6d7a5,#b69a53)}
+.card-number{font-size:18px;letter-spacing:2px;margin-top:18px}
+.card-bottom{display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase}
+.empty{padding:28px;text-align:center;color:var(--muted);font-size:12px}
+.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,20px);background:#173b29;color:#fff;padding:11px 16px;border-radius:10px;font-size:11px;opacity:0;pointer-events:none;transition:.25s;z-index:10;width:max-content;max-width:90%}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.hidden{display:none!important}
+@media(min-width:600px){body{padding:20px 0}.phone{min-height:calc(100dvh - 40px);border-radius:25px}.bottom-nav{bottom:20px;border-radius:0 0 25px 25px}.status{border-radius:25px 25px 0 0}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span id="clock">9:41</span><span>● ● ●　▰</span></div>
+  <header class="app-header">
+    <div class="header-row">
+      <div><p class="greeting">Hola, bienvenida</p><h1 class="user-name">Gabriela</h1></div>
+      <div class="header-actions">
+        <button class="circle-btn" aria-label="Notificaciones" onclick="navigate('notifications')">♧</button>
+        <button class="circle-btn" aria-label="Perfil" onclick="navigate('profile')">◉</button>
+      </div>
+    </div>
+    <div class="sim-banner">SIMULADOR EDUCATIVO · DATOS FICTICIOS</div>
+  </header>
+
+  <main id="main"></main>
+
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <button class="nav-item active" data-tab="home" onclick="navigate('home')"><span class="nav-ico">⌂</span>Inicio</button>
+    <button class="nav-item" data-tab="services" onclick="navigate('services')"><span class="nav-ico">▦</span>Servicios</button>
+    <button class="nav-item" data-tab="finance" onclick="navigate('finance')"><span class="nav-ico">▤</span>Finanzas</button>
+    <button class="nav-item" data-tab="movements" onclick="navigate('movements')"><span class="nav-ico">↕</span>Movimientos</button>
+    <button class="nav-item" data-tab="profile" onclick="navigate('profile')"><span class="nav-ico">☻</span>Más</button>
+  </nav>
+  <div id="toast" class="toast"></div>
+</div>
+
+<script>
+const state={
+  page:'home',showBalance:true,
+  accounts:[
+    {name:'Guardadito Digital',number:'5477',balance:8500.00,type:'Cuenta eje'},
+    {name:'Guardadito',number:'2184',balance:4080.00,type:'Cuenta de ahorro'}
+  ],
+  movements:[
+    {title:'Depósito en efectivo',detail:'Hoy · 11:32 a. m.',amount:2500,type:'in',icon:'＋'},
+    {title:'Compra en supermercado',detail:'Ayer · 6:14 p. m.',amount:684.50,type:'out',icon:'▣'},
+    {title:'Transferencia recibida',detail:'10 nov · 9:05 a. m.',amount:1200,type:'in',icon:'↙'},
+    {title:'Recarga de tiempo aire',detail:'09 nov · 4:42 p. m.',amount:100,type:'out',icon:'▤'},
+    {title:'Pago de servicio',detail:'08 nov · 1:20 p. m.',amount:415,type:'out',icon:'▧'}
+  ]
+};
+const money=n=>n.toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+const total=()=>state.accounts.reduce((s,a)=>s+a.balance,0);
+const main=document.getElementById('main');
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+function navActive(tab){document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab))}
+function navigate(page){state.page=page;navActive(['home','services','finance','movements','profile'].includes(page)?page:'');render()}
+function goBack(){navigate('home')}
+function pageTitle(title,sub=''){return `<div class="page-title"><button class="back" onclick="goBack()">‹</button><div><h1>${title}</h1>${sub?`<p class="page-sub">${sub}</p>`:''}</div></div>`}
+function movementHTML(m){return `<div class="movement"><div class="movement-icon">${m.icon}</div><div class="row-copy"><strong>${m.title}</strong><small>${m.detail}</small></div><div class="row-amount ${m.type==='in'?'amount-in':'amount-out'}">${m.type==='in'?'+':'−'}${money(m.amount)}</div></div>`}
+function home(){
+ const bal=state.showBalance?money(total()):'••••••';
+ return `<div class="balance-card">
+   <div class="card-top"><span>Saldo total disponible</span><button class="eye" onclick="state.showBalance=!state.showBalance;render()" aria-label="Mostrar u ocultar saldo">${state.showBalance?'◉':'◎'}</button></div>
+   <div class="balance-label">Todas tus cuentas</div><div class="balance">${bal}</div>
+   <div class="account-meta"><span>2 cuentas vinculadas</span><span>Actualizado ahora ✓</span></div>
+ </div>
+ <div class="section-head"><h2>¿Qué deseas hacer?</h2></div>
+ <div class="quick-grid">
+  ${quick('↗','Enviar','transfer')}${quick('↙','Recibir','receive')}${quick('▤','Pagar','pay')}${quick('▣','Retirar','withdraw')}
+ </div>
+ <div class="section-head"><h2>Mis cuentas</h2><button class="text-btn" onclick="navigate('accounts')">Ver todas</button></div>
+ <div class="panel">${state.accounts.map((a,i)=>`<div class="account-row" onclick="accountDetail(${i})"><div class="account-icon">▣</div><div class="row-copy"><strong>${a.name}</strong><small>•••• ${a.number} · ${a.type}</small></div><div class="row-amount">${state.showBalance?money(a.balance):'••••'}</div><span class="chev">›</span></div>`).join('')}</div>
+ <div class="section-head"><h2>Últimos movimientos</h2><button class="text-btn" onclick="navigate('movements')">Ver todos</button></div>
+ <div class="panel">${state.movements.slice(0,3).map(movementHTML).join('')}</div>
+ <div class="section-head"><h2>Descubre más</h2></div>
+ <div class="promo"><div class="promo-icon">✧</div><div><strong style="font-size:12px">Organiza tus finanzas</strong><p>Consulta tus cuentas y mantén el control de tus movimientos desde un solo lugar.</p></div></div>`;
+}
+function quick(icon,label,action){return `<button class="quick" onclick="navigate('${action}')"><span class="ico">${icon}</span><span>${label}</span></button>`}
+function services(){return `${pageTitle('Servicios','Realiza tus operaciones desde aquí')}
+ <div class="action-list">
+ ${action('↗','Transferencias','Envía dinero a otras cuentas','transfer')}
+ ${action('▤','Pago de servicios','Luz, agua, teléfono y más','pay')}
+ ${action('▣','Recargas','Recarga tiempo aire','recharge')}
+ ${action('⌑','Retiro de efectivo','Consulta opciones de retiro','withdraw')}
+ ${action('↙','Recibir dinero','Consulta cómo recibir una transferencia','receive')}
+ ${action('▧','Tarjeta digital','Consulta los datos de una tarjeta ficticia','digitalcard')}
+ ${action('⇄','Divisas','Consulta una conversión ilustrativa','currency')}
+ </div>`}
+function action(icon,title,desc,pg){return `<button class="action-card" onclick="navigate('${pg}')"><span class="account-icon">${icon}</span><span><strong>${title}</strong><small>${desc}</small></span><span class="chev">›</span></button>`}
+function finance(){return `${pageTitle('Finanzas','Información y herramientas')}
+ <div class="action-list">
+ ${action('▣','Mis cuentas','Consulta saldos y detalles','accounts')}
+ ${action('↕','Movimientos','Revisa tus operaciones simuladas','movements')}
+ ${action('▤','Presupuesto mensual','Organiza ingresos y gastos','budget')}
+ ${action('◈','Ahorro','Visualiza una meta de ahorro de ejemplo','savings')}
+ ${action('⌂','Créditos','Información demostrativa de productos','credits')}
+ </div><div class="notice" style="margin-top:14px">Los productos, tasas y condiciones no se ofrecen ni se tramitan desde este prototipo.</div>`}
+function movements(){return `${pageTitle('Movimientos','Actividad reciente de tus cuentas')}
+ <div class="notice">Estos movimientos son ficticios y solo existen dentro de esta demostración.</div>
+ <div class="panel">${state.movements.map(movementHTML).join('')}</div>`}
+function accounts(){return `${pageTitle('Mis cuentas','Tus cuentas de ejemplo')}
+ <div class="panel">${state.accounts.map((a,i)=>`<div class="account-row" onclick="accountDetail(${i})"><div class="account-icon">▣</div><div class="row-copy"><strong>${a.name}</strong><small>Cuenta •••• ${a.number}</small></div><div class="row-amount">${money(a.balance)}</div><span class="chev">›</span></div>`).join('')}</div>`}
+function accountDetail(i){state.selected=i;state.page='accountDetail';render()}
+function detail(){const a=state.accounts[state.selected||0];return `${pageTitle(a.name,'Cuenta terminación '+a.number)}
+ <div class="detail-balance"><small>Saldo disponible</small><strong>${money(a.balance)}</strong><small>Cuenta de demostración</small>
+ <div class="detail-actions"><button onclick="navigate('transfer')"><span>↗</span>Enviar</button><button onclick="navigate('receive')"><span>↙</span>Recibir</button><button onclick="navigate('movements')"><span>↕</span>Movimientos</button></div></div>
+ <div class="panel"><div class="account-row"><div class="row-copy"><strong>Tipo de cuenta</strong><small>${a.type}</small></div></div><div class="account-row"><div class="row-copy"><strong>Número de cuenta</strong><small>•••• •••• •••• ${a.number}</small></div></div><div class="account-row"><div class="row-copy"><strong>Moneda</strong><small>Peso mexicano (MXN)</small></div></div></div>`}
+function formField(label,id,placeholder,type='text',extra=''){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" placeholder="${placeholder}" ${extra}></div>`}
+function transfer(){return `${pageTitle('Transferir dinero','Simulación de transferencia')}
+ <div class="notice">No se envía dinero real. No ingreses datos bancarios auténticos. Usa únicamente la información de ejemplo.</div>
+ <form class="form-card" onsubmit="simulateTransfer(event)">
+ <div class="field"><label>Cuenta de origen</label><select id="origin">${state.accounts.map((a,i)=>`<option value="${i}">${a.name} · ${money(a.balance)}</option>`).join('')}</select></div>
+ ${formField('Nombre del destinatario','recipient','Ej. María López')}
+ ${formField('CLABE o cuenta ficticia','clabe','000000000000000000','text','inputmode="numeric" maxlength="18"')}
+ ${formField('Concepto','concept','Ej. Comida')}
+ ${formField('Cantidad (MXN)','amount','0.00','number','min="1" step="0.01"')}
+ <button class="primary" type="submit">Continuar simulación</button>
+ <p class="hint">La confirmación será ilustrativa. No se conecta a SPEI ni a ninguna institución financiera.</p></form>`}
+function simulateTransfer(e){e.preventDefault();const idx=+document.getElementById('origin').value,amount=+document.getElementById('amount').value,name=document.getElementById('recipient').value.trim(),clabe=document.getElementById('clabe').value.trim();if(!name||!clabe||!amount||amount<=0){toast('Completa los campos con datos ficticios.');return}if(amount>state.accounts[idx].balance){toast('El saldo de ejemplo es insuficiente.');return}state.accounts[idx].balance-=amount;state.movements.unshift({title:'Transferencia simulada · '+name,detail:'Ahora · Operación de demostración',amount,type:'out',icon:'↗'});state.lastTransfer={name,amount,clabe};state.page='transferSuccess';render()}
+function transferSuccess(){const t=state.lastTransfer;return `${pageTitle('Operación simulada','Resultado de demostración')}<div class="success" style="text-align:center;padding:24px 16px"><div style="font-size:34px">✓</div><strong style="font-size:16px">¡Simulación completada!</strong><p>Se actualizó el saldo ficticio de tu cuenta.</p></div><div class="form-card" style="margin-top:13px"><div class="row-copy"><small>Destinatario</small><strong>${escapeHTML(t.name)}</strong></div><hr style="border:0;border-top:1px solid var(--line);margin:13px 0"><div class="row-copy"><small>Importe simulado</small><strong>${money(t.amount)}</strong></div><hr style="border:0;border-top:1px solid var(--line);margin:13px 0"><div class="row-copy"><small>Referencia ficticia</small><strong>SIM-${Date.now().toString().slice(-7)}</strong></div></div><div class="notice" style="margin-top:13px">Esta operación no se envió, no generó un SPEI y no movió dinero real.</div><button class="primary" onclick="navigate('home')">Volver al inicio</button>`}
+function receive(){return `${pageTitle('Recibir dinero','Información de ejemplo')}<div class="form-card"><div class="detail-balance" style="border:0;padding:10px"><div style="font-size:30px;color:var(--green)">↙</div><strong style="font-size:16px">Comparte tus datos de ejemplo</strong><small>Estos datos no corresponden a una cuenta real.</small></div><div class="row-copy"><small>Beneficiario</small><strong>Gabriela Mendoza</strong></div><hr style="border:0;border-top:1px solid var(--line);margin:13px 0"><div class="row-copy"><small>Cuenta ficticia</small><strong>0000 0000 0000 5477</strong></div><button class="secondary" onclick="copyDemo()">Copiar datos de ejemplo</button></div>`}
+function copyDemo(){if(navigator.clipboard?.writeText){navigator.clipboard.writeText('Beneficiario: Gabriela Mendoza\\nCuenta ficticia: 0000 0000 0000 5477').then(()=>toast('Datos de ejemplo copiados')).catch(()=>toast('No se pudo copiar'))}else toast('Cuenta ficticia: 0000 0000 0000 5477')}
+function pay(){return `${pageTitle('Pagar servicios','Simulación de pago')}<div class="notice">No se realizan pagos reales. Selecciona un servicio de muestra.</div><form class="form-card" onsubmit="simpleOperation(event,'Pago de servicio')"><div class="field"><label>Servicio</label><select id="service"><option>Luz</option><option>Agua</option><option>Teléfono</option><option>Internet</option><option>Gas</option></select></div>${formField('Referencia ficticia','reference','Ej. 1234567890')}${formField('Importe (MXN)','amount','0.00','number','min="1" step="0.01"')}<button class="primary">Simular pago</button></form>`}
+function recharge(){return `${pageTitle('Tiempo aire','Simulación de recarga')}<div class="notice">No se realiza ninguna recarga real.</div><form class="form-card" onsubmit="simpleOperation(event,'Recarga simulada')">${formField('Número de teléfono de prueba','phone','5512345678','tel','maxlength="10"') }<div class="field"><label>Compañía</label><select><option>Telcel (demostración)</option><option>AT&T (demostración)</option><option>Movistar (demostración)</option></select></div><div class="field"><label>Importe</label><select id="amount"><option value="50">$50</option><option value="100">$100</option><option value="150">$150</option><option value="200">$200</option></select></div><button class="primary">Simular recarga</button></form>`}
+function simpleOperation(e,title){e.preventDefault();toast(title+' registrada solo en pantalla. No se realizó ningún cargo.')}
+function withdraw(){return `${pageTitle('Retirar efectivo','Opciones demostrativas')}<div class="action-list">${action('▣','Retiro en cajero','Consulta información general','withdrawInfo')}${action('▤','Retiro sin tarjeta','Demostración de flujo, sin generar códigos','withdrawInfo')}</div><div class="notice" style="margin-top:14px">Este prototipo no genera códigos de retiro ni autoriza disposiciones de efectivo.</div>`}
+function withdrawInfo(){return `${pageTitle('Información de retiro')}<div class="form-card"><div style="font-size:30px;text-align:center;color:var(--green)">▣</div><strong>Retiro de efectivo</strong><p class="hint">En una aplicación bancaria real, revisa los límites, comisiones y medidas de seguridad directamente con tu institución. Este simulador no genera códigos ni operaciones.</p><button class="primary" onclick="navigate('home')">Entendido</button></div>`}
+function digitalcard(){return `${pageTitle('Tarjeta digital','Tarjeta de demostración')}<div class="card-visual"><div class="header-row"><strong>CUENTA DIGITAL</strong><span>DEMO</span></div><div class="card-chip"></div><div class="card-number">••••　••••　••••　5477</div><div class="card-bottom"><span>GABRIELA M.</span><span>VENCE 00/00</span></div></div><div class="notice" style="margin-top:14px">Tarjeta ficticia: no tiene número completo, CVV ni capacidad de compra.</div>`}
+function currency(){return `${pageTitle('Divisas','Conversión ilustrativa')}<form class="form-card" onsubmit="convertDemo(event)">${formField('Cantidad en pesos mexicanos','mxn','1000','number','min="1" step="0.01"')}<div class="field"><label>Moneda de referencia</label><select id="currency"><option value="17.5">Dólar estadounidense (tipo ilustrativo)</option><option value="19">Euro (tipo ilustrativo)</option></select></div><button class="primary">Calcular ejemplo</button><div id="conversion" class="success hidden" style="margin-top:13px"></div><p class="hint">Tipos de cambio inventados para la demostración; no representan cotizaciones vigentes.</p></form>`}
+function convertDemo(e){e.preventDefault();const v=+document.getElementById('mxn').value,r=+document.getElementById('currency').value;const el=document.getElementById('conversion');el.classList.remove('hidden');el.textContent='Resultado ilustrativo: '+(v/r).toFixed(2)+' unidades.'}
+function budget(){return `${pageTitle('Presupuesto mensual','Ejemplo de organización')}<div class="form-card"><div class="row-copy"><small>Ingreso mensual de ejemplo</small><strong>${money(18000)}</strong></div><hr style="border:0;border-top:1px solid var(--line);margin:13px 0"><div class="row-copy"><small>Gastos registrados de ejemplo</small><strong>${money(9200)}</strong></div><hr style="border:0;border-top:1px solid var(--line);margin:13px 0"><div class="row-copy"><small>Disponible estimado</small><strong style="color:var(--green)">${money(8800)}</strong></div><p class="hint">Cifras ilustrativas que no están vinculadas a tus cuentas.</p></div>`}
+function savings(){return `${pageTitle('Meta de ahorro','Ejemplo de objetivo')}<div class="form-card"><div class="row-copy"><small>Meta: fondo de emergencia</small><strong>${money(7500)} de ${money(15000)}</strong></div><div style="height:10px;background:#e9efeb;border-radius:10px;margin:15px 0;overflow:hidden"><div style="width:50%;height:100%;background:var(--green);border-radius:10px"></div></div><strong style="color:var(--green)">50% completado</strong><p class="hint">Progreso ilustrativo.</p></div>`}
+function credits(){return `${pageTitle('Créditos','Información demostrativa')}<div class="form-card"><strong>Conoce tus opciones</strong><p class="hint">Los créditos requieren evaluación, condiciones y contratación con la institución correspondiente. Este prototipo no consulta ofertas ni recibe solicitudes.</p></div>`}
+function notifications(){return `${pageTitle('Notificaciones')}<div class="panel"><div class="movement"><div class="movement-icon">✓</div><div class="row-copy"><strong>Bienvenida al simulador</strong><small>Explora las funciones con datos ficticios.</small></div></div><div class="movement"><div class="movement-icon">◷</div><div class="row-copy"><strong>Actividad de demostración</strong><small>Los movimientos no son reales.</small></div></div></div>`}
+function profile(){return `${pageTitle('Más opciones','Configuración del simulador')}<div class="action-list">${action('♙','Mi perfil','Datos de ejemplo','profileInfo')}${action('⚙','Configuración','Preferencias de demostración','settings')}${action('ⓘ','Acerca de','Información del prototipo','about')}</div>`}
+function profileInfo(){return `${pageTitle('Mi perfil')}<div class="form-card"><div class="row-copy"><small>Nombre de muestra</small><strong>Gabriela Mendoza</strong></div><hr style="border:0;border-top:1px solid var(--line);margin:13px 0"><div class="row-copy"><small>Correo de muestra</small><strong>gabriela.ejemplo@correo.test</strong></div><p class="hint">No se almacenan datos personales ni credenciales.</p></div>`}
+function settings(){return `${pageTitle('Configuración')}<div class="action-list">${action('◉','Privacidad','No se recopilan datos','about')}${action('♧','Notificaciones','Avisos de demostración','notifications')}</div><button class="secondary" onclick="state.movements=state.movements.slice(0,5);state.accounts=[{name:'Guardadito Digital',number:'5477',balance:8500,type:'Cuenta eje'},{name:'Guardadito',number:'2184',balance:4080,type:'Cuenta de ahorro'}];toast('Datos de demostración restablecidos');navigate('home')">Restablecer simulador</button>`}
+function about(){return `${pageTitle('Acerca del simulador')}<div class="form-card"><strong>Prototipo educativo</strong><p class="hint">Interfaz de práctica inspirada en patrones comunes de aplicaciones bancarias. No es una aplicación oficial, no está afiliada a ninguna institución financiera y no permite operaciones reales.</p><p class="hint">No ingreses contraseñas, NIP, CVV, tokens, CLABE reales ni información bancaria personal.</p></div>`}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const pages={home,services,finance,movements,accounts,accountDetail:detail,transfer,transferSuccess,receive,pay,recharge,withdraw,withdrawInfo,digitalcard,currency,budget,savings,credits,notifications,profile,profileInfo,settings,about};
+function render(){main.innerHTML=(pages[state.page]||home)();main.scrollTop=0}
+function updateClock(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}
+updateClock();setInterval(updateClock,30000);render();
+</script>
+</body>
+</html>
