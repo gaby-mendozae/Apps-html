@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Robot Excel Pixel Art - Combinar y Separar Celdas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        /* Custom smooth scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        /* Excel Table styling */
+        .excel-table {
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .excel-cell {
+            border: 1px solid #334155;
+            box-sizing: border-box;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+            position: relative;
+        }
+        .excel-cell:active {
+            filter: brightness(1.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 px-3 py-2.5 sticky top-0 z-40 shadow-md">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="bg-gradient-to-br from-emerald-500 to-teal-700 text-white w-9 h-9 rounded-xl font-bold flex items-center justify-center shadow-md">
+                    <i class="fa-solid fa-robot text-base"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold leading-tight">Robot Excel Pixel Art</h1>
+                    <p class="text-[10px] text-slate-400">Aprende a combinar, separar y pintar</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-1.5">
+                <button onclick="openModal('guideModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1">
+                    <i class="fa-solid fa-book text-emerald-400"></i>
+                    <span>Guía</span>
+                </button>
+                <button onclick="openModal('referenceModal')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1 shadow-sm">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Modelo</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-md w-full mx-auto p-3 flex flex-col justify-between">
+        
+        <!-- Controls & Status Bar -->
+        <div class="space-y-2.5 mb-3">
+            
+            <!-- Mini Reference Bar -->
+            <div onclick="openModal('referenceModal')" class="bg-slate-900 border border-slate-800 hover:border-emerald-500/60 rounded-xl p-2.5 flex items-center justify-between cursor-pointer transition shadow-sm group">
+                <div class="flex items-center space-x-3">
+                    <div id="miniPreviewContainer" class="w-11 h-11 bg-slate-950 rounded-lg border border-slate-800 grid grid-cols-10 grid-rows-12 gap-[0.5px] p-0.5 overflow-hidden">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold block text-slate-200 flex items-center gap-1.5 group-hover:text-emerald-400 transition">
+                            <span>🤖 Modelo de Robot Excel</span>
+                            <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full font-medium">Ver 12×10</span>
+                        </span>
+                        <span class="text-[10px] text-slate-400">Toca para inspeccionar la estructura exacta</span>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-500 pr-1 group-hover:translate-x-0.5 transition"></i>
+            </div>
+
+            <!-- Toolbar Action Buttons -->
+            <div class="grid grid-cols-4 gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800 shadow-inner">
+                <button id="tool-select" onclick="setTool('select')" class="flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[11px] font-semibold transition bg-emerald-600 text-white shadow">
+                    <i class="fa-solid fa-wand-magic-sparkles mb-1 text-xs"></i>
+                    <span>Seleccionar</span>
+                </button>
+                <button id="tool-merge" onclick="mergeSelectedCells()" class="flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[11px] font-semibold transition bg-slate-800 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-object-group mb-1 text-xs text-blue-400"></i>
+                    <span>Combinar</span>
+                </button>
+                <button id="tool-split" onclick="splitSelectedCells()" class="flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[11px] font-semibold transition bg-slate-800 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-object-ungroup mb-1 text-xs text-amber-400"></i>
+                    <span>Separar</span>
+                </button>
+                <button id="tool-paint" onclick="setTool('paint')" class="flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[11px] font-semibold transition bg-slate-800 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-fill-drip mb-1 text-xs text-purple-400"></i>
+                    <span>Colorear</span>
+                </button>
+            </div>
+
+            <!-- Color Palette -->
+            <div id="paletteBar" class="bg-slate-900 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
+                <span class="text-[11px] font-medium text-slate-400 pl-1">Paleta:</span>
+                <div class="flex items-center space-x-1.5 overflow-x-auto py-0.5 px-1 no-scrollbar flex-1 justify-end">
+                    <button onclick="setColor('#1e293b')" class="color-swatch w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex-shrink-0 transition transform hover:scale-110" data-color="#1e293b" title="Fondo por defecto"></button>
+                    <button onclick="setColor('#3b82f6')" class="color-swatch w-6 h-6 rounded-full bg-blue-500 border-2 border-white ring-2 ring-blue-500/50 flex-shrink-0 transition transform hover:scale-110" data-color="#3b82f6" title="Azul"></button>
+                    <button onclick="setColor('#64748b')" class="color-swatch w-6 h-6 rounded-full bg-slate-500 border border-transparent flex-shrink-0 transition transform hover:scale-110" data-color="#64748b" title="Gris"></button>
+                    <button onclick="setColor('#ef4444')" class="color-swatch w-6 h-6 rounded-full bg-red-500 border border-transparent flex-shrink-0 transition transform hover:scale-110" data-color="#ef4444" title="Rojo"></button>
+                    <button onclick="setColor('#eab308')" class="color-swatch w-6 h-6 rounded-full bg-yellow-500 border border-transparent flex-shrink-0 transition transform hover:scale-110" data-color="#eab308" title="Amarillo"></button>
+                    <button onclick="setColor('#22c55e')" class="color-swatch w-6 h-6 rounded-full bg-green-500 border border-transparent flex-shrink-0 transition transform hover:scale-110" data-color="#22c55e" title="Verde"></button>
+                    <button onclick="setColor('#a855f7')" class="color-swatch w-6 h-6 rounded-full bg-purple-500 border border-transparent flex-shrink-0 transition transform hover:scale-110" data-color="#a855f7" title="Morado"></button>
+                    <button onclick="setColor('#f43f5e')" class="color-swatch w-6 h-6 rounded-full bg-rose-500 border border-transparent flex-shrink-0 transition transform hover:scale-110" data-color="#f43f5e" title="Rosa"></button>
+                </div>
+            </div>
+
+            <!-- Helper instructions banner -->
+            <div id="instructionBanner" class="bg-emerald-950/40 border border-emerald-800/60 rounded-xl px-3 py-2 flex items-center justify-between text-xs text-emerald-200 shadow-inner">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                    <span id="instructionText">Toca la 1ª celda y luego la 2ª para seleccionar el rango a combinar.</span>
+                </div>
+                <button onclick="clearSelection()" class="text-emerald-400 hover:text-white underline text-[11px] ml-2 flex-shrink-0">Limpiar</button>
+            </div>
+        </div>
+
+        <!-- Spreadsheet Table Workspace (12 rows x 10 cols) -->
+        <div class="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-2 shadow-inner overflow-auto relative flex flex-col items-center justify-center mb-3 min-h-[360px]">
+            <table class="excel-table" id="excelTable">
+                <thead>
+                    <tr id="tableHeaderRow">
+                        <th class="w-7 h-7 bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-500 sticky left-0 z-30">#</th>
+                        <!-- Populated via JS -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bottom Action Buttons -->
+        <div class="flex items-center space-x-2 pt-1">
+            <button onclick="resetGrid()" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 py-2.5 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-1 flex-1 shadow-sm">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Reiniciar</span>
+            </button>
+            <button onclick="verifyRobotMatch()" class="bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 px-4 rounded-xl text-xs font-semibold transition shadow-lg shadow-emerald-900/40 flex items-center justify-center space-x-1.5 flex-[2]">
+                <i class="fa-solid fa-check-double"></i>
+                <span>¡Verificar Robot!</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Reference Robot Modal -->
+    <div id="referenceModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-4 shadow-2xl relative flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg text-xs">
+                        <i class="fa-solid fa-table-cells"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Modelo de Robot en Cuadrícula</h3>
+                        <p class="text-[10px] text-slate-400">Estructura ideal en Excel (12×10)</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('referenceModal')" class="text-slate-400 hover:text-white bg-slate-800 w-7 h-7 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+            
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-center overflow-auto my-auto py-4">
+                <div id="modalReferenceGrid" class="grid grid-cols-10 gap-[1px] bg-slate-800 p-1 rounded border border-slate-700">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 text-center">
+                <p class="text-[11px] text-slate-400 mb-3">Combina y colorea tu hoja igual que este modelo.</p>
+                <button onclick="closeModal('referenceModal')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-semibold transition shadow">
+                    ¡Entendido!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Guide Modal -->
+    <div id="guideModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                <h3 class="text-sm font-bold text-white">Guía de Uso en Celular 📱</h3>
+                <button onclick="closeModal('guideModal')" class="text-slate-400 hover:text-white bg-slate-800 w-7 h-7 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3 text-xs text-slate-300">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-start space-x-2.5">
+                    <div class="bg-emerald-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-bold flex-shrink-0 text-[10px]">1</div>
+                    <div>
+                        <strong class="text-white block mb-0.5">Seleccionar Rango</strong>
+                        Toca la celda inicial (esquina superior izquierda) y luego la celda final (esquina inferior derecha).
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-start space-x-2.5">
+                    <div class="bg-blue-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-bold flex-shrink-0 text-[10px]">2</div>
+                    <div>
+                        <strong class="text-white block mb-0.5">Combinar (Merge)</strong>
+                        Pulsa <span class="text-blue-400 font-semibold">"Combinar"</span> para unir el rectángulo perfectamente sin saltos en vertical ni horizontal.
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-start space-x-2.5">
+                    <div class="bg-amber-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-bold flex-shrink-0 text-[10px]">3</div>
+                    <div>
+                        <strong class="text-white block mb-0.5">Separar (Unmerge)</strong>
+                        Selecciona una celda combinada y pulsa <span class="text-amber-400 font-semibold">"Separar"</span> para restaurar sus celdas originales.
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-start space-x-2.5">
+                    <div class="bg-purple-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-bold flex-shrink-0 text-[10px]">4</div>
+                    <div>
+                        <strong class="text-white block mb-0.5">Colorear Pixel Art</strong>
+                        Activa <span class="text-purple-400 font-semibold">"Colorear"</span>, elige un color de la paleta y toca la celda o bloque.
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeModal('guideModal')" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-semibold transition shadow">
+                ¡Empezar a Construir!
+            </button>
+        </div>
+    </div>
+
+    <!-- Evaluation / Celebration Modal -->
+    <div id="celebrationModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-emerald-500/50 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center relative">
+            <div id="modalIconContainer" class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-3 border border-emerald-500/40 text-2xl animate-bounce">
+                🤖🎉
+            </div>
+            <h3 id="celebrationTitle" class="text-lg font-bold text-white mb-1">¡Robot Construido!</h3>
+            <p id="celebrationMessage" class="text-xs text-slate-300 mb-5">Has combinado y coloreado las celdas correctamente imitando el modelo de referencia. ¡Excelente dominio de Excel!</p>
+            
+            <div class="space-y-2">
+                <button onclick="closeModal('celebrationModal')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-semibold transition shadow-lg shadow-emerald-900/40">
+                    Seguir explorando
+                </button>
+                <button onclick="resetGrid(); closeModal('celebrationModal');" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-semibold transition">
+                    Reiniciar tablero
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const COLS = 10;
+        const ROWS = 12;
+        const CELL_SIZE = 38; // px
+
+        let currentTool = 'select'; // 'select', 'paint'
+        let currentColor = '#3b82f6';
+        
+        let selectionStart = null; // {r, c}
+        let selectionEnd = null;   // {r, c}
+
+        let gridMatrix = []; // 2D array of cell objects
+
+        // Define exact robot target specification for verification (12 rows x 10 cols)
+        // Each entry defines: type ('single' or 'merged'), color, and optional dimensions if top-left master
+        // Let's establish precise reference blocks:
+        // - Antena: row 0, cols 4-5 (merged 1x2, blue)
+        // - Cabeza: rows 1-2, cols 3-6 (merged 2x4, slate)
+        //   - Ojos: row 1, col 3 (red), row 1, col 6 (red) inside cabeza
+        // - Cuello: row 3, cols 4-5 (merged 1x2, yellow)
+        // - Cuerpo: rows 4-7, cols 2-7 (merged 4x6, green)
+        // - Brazos: rows 4-6, cols 0-1 (merged 3x2, orange) & rows 4-6, cols 8-9 (merged 3x2, orange)
+        // - Piernas: rows 8-9, cols 3-4 (merged 2x2, purple) & rows 8-9, cols 5-6 (merged 2x2, purple)
+        
+        function getReferenceSpec(r, c) {
+            // Antena (r:0, c:4..5)
+            if (r === 0 && (c === 4 || c === 5)) return { master: {r:0, c:4}, color: '#3b82f6', rSpan: 1, cSpan: 2 };
+            // Cabeza (r:1..2, c:3..6)
+            if (r >= 1 && r <= 2 && c >= 3 && c <= 6) {
+                if (r === 1 && c === 3) return { master: {r:1, c:3}, color: '#ef4444', rSpan: 1, cSpan: 1 };
+                if (r === 1 && c === 6) return { master: {r:1, c:6}, color: '#ef4444', rSpan: 1, cSpan: 1 };
+                return { master: {r:1, c:3}, color: '#64748b', rSpan: 2, cSpan: 4 };
+            }
+            // Cuello (r:3, c:4..5)
+            if (r === 3 && (c === 4 || c === 5)) return { master: {r:3, c:4}, color: '#eab308', rSpan: 1, cSpan: 2 };
+            // Cuerpo (r:4..7, c:2..7)
+            if (r >= 4 && r <= 7 && c >= 2 && c <= 7) return { master: {r:4, c:2}, color: '#22c55e', rSpan: 4, cSpan: 6 };
+            // Brazos izq (r:4..6, c:0..1)
+            if (r >= 4 && r <= 6 && (c === 0 || c === 1)) return { master: {r:4, c:0}, color: '#eab308', rSpan: 3, cSpan: 2 };
+            // Brazos der (r:4..6, c:8..9)
+            if (r >= 4 && r <= 6 && (c === 8 || c === 9)) return { master: {r:4, c:8}, color: '#eab308', rSpan: 3, cSpan: 2 };
+            // Pierna izq (r:8..9, c:3..4)
+            if (r >= 8 && r <= 9 && (c === 3 || c === 4)) return { master: {r:8, c:3}, color: '#a855f7', rSpan: 2, cSpan: 2 };
+            // Pierna der (r:8..9, c:5..6)
+            if (r >= 8 && r <= 9 && (c === 5 || c === 6)) return { master: {r:8, c:5}, color: '#a855f7', rSpan: 2, cSpan: 2 };
+
+            return { master: {r:r, c:c}, color: '#1e293b', rSpan: 1, cSpan: 1 };
+        }
+
+        function initGridMatrix() {
+            gridMatrix = [];
+            for (let r = 0; r < ROWS; r++) {
+                let row = [];
+                for (let c = 0; c < COLS; c++) {
+                    row.push({
+                        id: `r${r}c${c}`,
+                        r: r,
+                        c: c,
+                        rowSpan: 1,
+                        colSpan: 1,
+                        isMerged: false,
+                        isHidden: false,
+                        color: '#1e293b',
+                        mergedGroupId: null
+                    });
+                }
+                gridMatrix.push(row);
+            }
+            loadFromLocalStorage();
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('robot_excel_matrix', JSON.stringify(gridMatrix));
+            } catch (e) {
+                console.error("Storage error:", e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('robot_excel_matrix');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed.length === ROWS && parsed[0].length === COLS) {
+                        gridMatrix = parsed;
+                    }
+                }
+            } catch (e) {
+                console.error("Load storage error:", e);
+            }
+        }
+
+        function renderTable() {
+            // Render Headers A, B, C...
+            const headerRow = document.getElementById('tableHeaderRow');
+            let hHTML = '<th class="w-7 h-8 bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-500 sticky left-0 z-30">#</th>';
+            for (let c = 0; c < COLS; c++) {
+                let letter = String.fromCharCode(65 + c);
+                hHTML += `<th class="h-8 bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-400 text-center" style="width: ${CELL_SIZE}px;">${letter}</th>`;
+            }
+            headerRow.innerHTML = hHTML;
+
+            // Render Body Rows & Cells
+            const tableBody = document.getElementById('tableBody');
+            let bodyHTML = '';
+
+            for (let r = 0; r < ROWS; r++) {
+                bodyHTML += `<tr>`;
+                // Row Number Header
+                bodyHTML += `<td class="w-7 bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-500 text-center sticky left-0 z-20" style="height: ${CELL_SIZE}px;">${r + 1}</td>`;
+
+                for (let c = 0; c < COLS; c++) {
+                    let cell = gridMatrix[r][c];
+
+                    if (cell.isHidden) {
+                        continue; // Skip rendering cells hidden inside a rowspan/colspan merge
+                    }
+
+                    let width = cell.colSpan * CELL_SIZE;
+                    let height = cell.rowSpan * CELL_SIZE;
+                    let isPainted = cell.color !== '#1e293b';
+                    let bgColor = isPainted ? cell.color : '#0f172a';
+
+                    // Selection checking
+                    let isSelected = isInSelection(r, c, cell.rowSpan, cell.colSpan);
+                    let isStart = selectionStart && selectionStart.r === r && selectionStart.c === c;
+
+                    let classes = "excel-cell text-center text-[10px] font-medium cursor-pointer relative ";
+                    if (isStart) {
+                        classes += "ring-2 ring-emerald-400 z-30 bg-emerald-950/50 ";
+                    } else if (isSelected) {
+                        classes += "bg-emerald-900/30 ring-1 ring-emerald-500/60 z-20 ";
+                    }
+
+                    bodyHTML += `
+                        <td colspan="${cell.colSpan}" rowspan="${cell.rowSpan}" 
+                            class="${classes}"
+                            style="width: ${width}px; height: ${height}px; background-color: ${bgColor}; color: ${isPainted ? getContrastColor(cell.color) : '#64748b'};"
+                            onclick="handleCellClick(${r}, ${c})">
+                            <div class="w-full h-full flex items-center justify-center overflow-hidden pointer-events-none">
+                                <span>${cell.rowSpan > 1 || cell.colSpan > 1 ? `${cell.colSpan}×${cell.rowSpan}` : ''}</span>
+                            </div>
+                        </td>
+                    `;
+                }
+                bodyHTML += `</tr>`;
+            }
+            tableBody.innerHTML = bodyHTML;
+            renderMiniPreview();
+            renderModalReferenceGrid();
+            saveToLocalStorage();
+        }
+
+        function isInSelection(r, c, rSpan, cSpan) {
+            if (!selectionStart) return false;
+            let end = selectionEnd || selectionStart;
+            let minR = Math.min(selectionStart.r, end.r);
+            let maxR = Math.max(selectionStart.r, end.r);
+            let minC = Math.min(selectionStart.c, end.c);
+            let maxC = Math.max(selectionStart.c, end.c);
+
+            let cellEndR = r + rSpan - 1;
+            let cellEndC = c + cSpan - 1;
+
+            return !(cellEndR < minR || r > maxR || cellEndC < minC || c > maxC);
+        }
+
+        function handleCellClick(r, c) {
+            let cell = gridMatrix[r][c];
+
+            // If we clicked a hidden cell or part of a merged block, find its master cell
+            let masterR = r;
+            let masterC = c;
+            if (cell.isHidden) {
+                // Find master by scanning upwards/leftwards
+                for (let prevR = r; prevR >= 0; prevR--) {
+                    for (let prevC = c; prevC >= 0; prevC--) {
+                        let candidate = gridMatrix[prevR][prevC];
+                        if (!candidate.isHidden && prevR + candidate.rowSpan > r && prevC + candidate.colSpan > c) {
+                            masterR = prevR;
+                            masterC = prevC;
+                            break;
+                        }
+                    }
+                    if (masterR !== r || masterC !== c) break;
+                }
+            }
+
+            let masterCell = gridMatrix[masterR][masterC];
+
+            if (currentTool === 'paint') {
+                // Apply color to master cell (which paints the entire merged span)
+                masterCell.color = currentColor;
+                renderTable();
+                return;
+            }
+
+            // Selection tool for merging/unmerging
+            if (!selectionStart) {
+                selectionStart = { r: masterR, c: masterC };
+                selectionEnd = null;
+                updateInstruction("Celda inicial marcada. Toca la celda final del rectángulo.");
+            } else if (!selectionEnd) {
+                selectionEnd = { r: masterR, c: masterC };
+                updateInstruction("Rango seleccionado. Pulsa 'Combinar' o 'Separar'.");
+            } else {
+                selectionStart = { r: masterR, c: masterC };
+                selectionEnd = null;
+                updateInstruction("Nueva celda inicial marcada.");
+            }
+            renderTable();
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+            const btnSelect = document.getElementById('tool-select');
+            const btnPaint = document.getElementById('tool-paint');
+
+            if (tool === 'select') {
+                btnSelect.className = "flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[11px] font-semibold transition bg-emerald-600 text-white shadow";
+                btnPaint.className = "flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[11px] font-semibold transition bg-slate-800 text-slate-300 hover:text-white";
+                updateInstruction("Toca la 1ª celda y luego la 2ª para seleccionar el rango a combinar.");
+            } else {
+                btnPaint.className = "flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[11px] font-semibold transition bg-purple-600 text-white shadow";
+                btnSelect.className = "flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[11px] font-semibold transition bg-slate-800 text-slate-300 hover:text-white";
+                updateInstruction("Modo Colorear activo. Toca cualquier celda para pintarla.");
+            }
+            clearSelection();
+        }
+
+        function setColor(hex) {
+            currentColor = hex;
+            document.querySelectorAll('.color-swatch').forEach(btn => {
+                if (btn.getAttribute('data-color') === hex) {
+                    btn.classList.add('border-white', 'ring-2', 'ring-purple-400');
+                    btn.classList.remove('border-transparent', 'border-slate-700');
+                } else {
+                    btn.classList.remove('border-white', 'ring-2', 'ring-purple-400');
+                    btn.classList.add('border-transparent');
+                }
+            });
+        }
+
+        function mergeSelectedCells() {
+            if (!selectionStart) {
+                showAlertBanner("Selecciona un rango tocando dos celdas primero.");
+                return;
+            }
+            let end = selectionEnd || selectionStart;
+            let minR = Math.min(selectionStart.r, end.r);
+            let maxR = Math.max(selectionStart.r, end.r);
+            let minC = Math.min(selectionStart.c, end.c);
+            let maxC = Math.max(selectionStart.c, end.c);
+
+            if (minR === maxR && minC === maxC) {
+                showAlertBanner("Selecciona al menos 2 celdas (vertical u horizontal) para combinar.");
+                return;
+            }
+
+            // 1. Fully unmerge any pre-existing merges inside this bounding box first to prevent structural corruption
+            for (let r = minR; r <= maxR; r++) {
+                for (let c = minC; c <= maxC; c++) {
+                    let cell = gridMatrix[r][c];
+                    if (cell.isMerged || cell.isHidden) {
+                        // Find master and unmerge it cleanly
+                        let mr = cell.isHidden ? findMasterRow(r, c) : r;
+                        let mc = cell.isHidden ? findMasterCol(r, c) : c;
+                        unmergeCellQuiet(mr, mc);
+                    }
+                }
+            }
+
+            let rowSpan = maxR - minR + 1;
+            let colSpan = maxC - minC + 1;
+
+            // 2. Set master cell properties at (minR, minC)
+            let master = gridMatrix[minR][minC];
+            master.rowSpan = rowSpan;
+            master.colSpan = colSpan;
+            master.isMerged = true;
+            master.isHidden = false;
+            master.mergedGroupId = `group_${minR}_${minC}`;
+
+            // 3. Mark all other cells in the range as hidden
+            for (let r = minR; r <= maxR; r++) {
+                for (let c = minC; c <= maxC; c++) {
+                    if (r === minR && c === minC) continue;
+                    let target = gridMatrix[r][c];
+                    target.isHidden = true;
+                    target.rowSpan = 1;
+                    target.colSpan = 1;
+                    target.isMerged = false;
+                    target.mergedGroupId = master.mergedGroupId;
+                    // If target had a color, pass it to master if master is default
+                    if (target.color !== '#1e293b' && master.color === '#1e293b') {
+                        master.color = target.color;
+                    }
+                }
+            }
+
+            clearSelection();
+            renderTable();
+            updateInstruction("¡Celdas combinadas perfectamente sin saltos!");
+        }
+
+        function findMasterRow(r, c) {
+            for (let pr = r; pr >= 0; pr--) {
+                for (let pc = c; pc >= 0; pc--) {
+                    let cand = gridMatrix[pr][pc];
+                    if (!cand.isHidden && pr + cand.rowSpan > r && pc + cand.colSpan > c) {
+                        return pr;
+                    }
+                }
+            }
+            return r;
+        }
+
+        function findMasterCol(r, c) {
+            for (let pr = r; pr >= 0; pr--) {
+                for (let pc = c; pc >= 0; pc--) {
+                    let cand = gridMatrix[pr][pc];
+                    if (!cand.isHidden && pr + cand.rowSpan > r && pc + cand.colSpan > c) {
+                        return pc;
+                    }
+                }
+            }
+            return c;
+        }
+
+        function unmergeCellQuiet(r, c) {
+            let cell = gridMatrix[r][c];
+            if (!cell.isMerged && cell.rowSpan === 1 && cell.colSpan === 1) return;
+
+            let startR = cell.r;
+            let startC = cell.c;
+            let rSpan = cell.rowSpan;
+            let cSpan = cell.colSpan;
+
+            for (let row = startR; row < startR + rSpan; row++) {
+                for (let col = startC; col < startC + cSpan; col++) {
+                    let subCell = gridMatrix[row][col];
+                    subCell.isHidden = false;
+                    subCell.rowSpan = 1;
+                    subCell.colSpan = 1;
+                    subCell.isMerged = false;
+                    subCell.mergedGroupId = null;
+                }
+            }
+        }
+
+        function splitSelectedCells() {
+            if (!selectionStart) {
+                showAlertBanner("Toca la celda combinada que deseas separar.");
+                return;
+            }
+            let cell = gridMatrix[selectionStart.r][selectionStart.c];
+
+            if (!cell.isMerged && cell.rowSpan === 1 && cell.colSpan === 1) {
+                showAlertBanner("Esta celda ya está separada.");
+                return;
+            }
+
+            unmergeCellQuiet(selectionStart.r, selectionStart.c);
+            clearSelection();
+            renderTable();
+            updateInstruction("¡Celdas separadas correctamente!");
+        }
+
+        function clearSelection() {
+            selectionStart = null;
+            selectionEnd = null;
+            renderTable();
+        }
+
+        function resetGrid() {
+            if (confirm("¿Reiniciar todo el tablero de Excel?")) {
+                localStorage.removeItem('robot_excel_matrix');
+                initGridMatrix();
+                clearSelection();
+                updateInstruction("Tablero reiniciado. Selecciona tu primera celda.");
+            }
+        }
+
+        function updateInstruction(text) {
+            document.getElementById('instructionText').textContent = text;
+        }
+
+        function showAlertBanner(msg) {
+            updateInstruction(msg);
+            setTimeout(() => {
+                updateInstruction("Usa los botones de herramientas y toca las celdas.");
+            }, 3500);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function getContrastColor(hex) {
+            if (!hex || hex === '#1e293b') return '#94a3b8';
+            return '#ffffff';
+        }
+
+        function renderMiniPreview() {
+            const container = document.getElementById('miniPreviewContainer');
+            let html = '';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    let spec = getReferenceSpec(r, c);
+                    html += `<div style="background-color: ${spec.color};" class="w-full h-full rounded-[0.5px]"></div>`;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function renderModalReferenceGrid() {
+            const container = document.getElementById('modalReferenceGrid');
+            let html = '';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    let spec = getReferenceSpec(r, c);
+                    html += `
+                        <div class="w-6 h-6 flex items-center justify-center text-[8px] font-bold border border-slate-700/60 rounded-[1px]" style="background-color: ${spec.color};">
+                        </div>
+                    `;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function verifyRobotMatch() {
+            // Automated evaluation check against reference robot spec
+            let errors = [];
+            let correctCount = 0;
+            let totalChecks = 0;
+
+            // Check key master blocks and colors
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    let ref = getReferenceSpec(r, c);
+                    // Only check master cells of reference
+                    if (ref.master.r === r && ref.master.c === c) {
+                        totalChecks++;
+                        let actual = gridMatrix[r][c];
+                        let refColor = ref.color;
+                        let refSpanR = ref.rSpan;
+                        let refSpanC = ref.cSpan;
+
+                        if (actual.rowSpan === refSpanR && actual.colSpan === refSpanC && actual.color.toLowerCase() === refColor.toLowerCase()) {
+                            correctCount++;
+                        }
+                    }
+                }
+            }
+
+            let percentage = Math.round((correctCount / totalChecks) * 100);
+
+            const titleElem = document.getElementById('celebrationTitle');
+            const msgElem = document.getElementById('celebrationMessage');
+            const iconElem = document.getElementById('modalIconContainer');
+
+            if (percentage >= 85) {
+                iconElem.innerHTML = "🤖✨";
+                iconElem.className = "w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-3 border border-emerald-500/40 text-2xl animate-bounce";
+                titleElem.textContent = `¡Impresionante! (${percentage}% Precisión)`;
+                msgElem.textContent = "¡Has construido el robot pixel art combinando y coloreando las celdas de Excel a la perfección! Excelente trabajo.";
+            } else {
+                iconElem.innerHTML = "🤖🔍";
+                iconElem.className = "w-16 h-16 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-3 border border-amber-500/40 text-2xl";
+                titleElem.textContent = `¡Buen intento! (${percentage}% Coincidencia)`;
+                msgElem.textContent = "Tu robot va por buen camino, pero algunas combinaciones de celdas o colores aún no coinciden del todo con el modelo de referencia. ¡Revisa el modelo y ajústalo!";
+            }
+
+            openModal('celebrationModal');
+        }
+
+        window.onload = function() {
+            initGridMatrix();
+            renderTable();
+        };
+    </script>
+</body>
+</html>
