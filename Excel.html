@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel paso a paso — Laboratorio interactivo</title>
+<style>
+:root{--green:#107c41;--green2:#185c37;--light:#e8f3eb;--line:#d7dfe5;--text:#1d2939;--blue:#dceaf7;--gold:#fff2cc}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,sans-serif;color:var(--text);background:#f4f6f8}
+button,input,select{font:inherit}button{cursor:pointer;border:1px solid #c8d1d9;background:white;border-radius:6px;padding:7px 10px}button:hover{background:#edf6ef;border-color:#8db99c}
+.top{background:var(--green2);color:white;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}.logo{font-size:24px;font-weight:800;background:#21a366;padding:5px 9px;border-radius:5px}.top strong{font-size:20px}.top span{opacity:.85}
+.toolbar{background:#fff;border-bottom:1px solid #ccd4db;padding:9px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:5;box-shadow:0 2px 5px #00000008}
+.group{display:flex;gap:5px;align-items:center;padding:2px 8px;border-right:1px solid #e0e5e9;flex-wrap:wrap}.group label{font-size:12px;color:#536273}.toolbar select,.toolbar input{padding:6px;border:1px solid #cbd3da;border-radius:5px;background:#fff;max-width:140px}.toolbar input[type=color]{width:35px;height:31px;padding:2px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:12px;padding:12px;align-items:start}.sheet-panel{min-width:0;background:white;border:1px solid #d4dce2;border-radius:8px;overflow:hidden}.formula-bar{display:flex;gap:8px;padding:8px;background:#f8fafb;border-bottom:1px solid var(--line);align-items:center}.namebox{width:68px;text-align:center;border:1px solid var(--line);padding:7px;border-radius:4px;background:white;font-size:13px}.fx{font-weight:700;color:#566575}.formula{flex:1;min-width:0;border:1px solid var(--line);border-radius:4px;padding:7px}
+.grid-wrap{overflow:auto;max-height:62vh}.grid{border-collapse:collapse;table-layout:fixed;min-width:100%;font-size:13px}.grid th,.grid td{border:1px solid #dbe2e8;height:30px;min-width:88px;width:100px;padding:4px 7px;white-space:pre-wrap;overflow-wrap:anywhere;position:relative}.grid thead th,.rowhead,.corner{background:#f1f4f6;color:#5b6672;text-align:center;font-weight:500;min-width:35px;width:35px;padding:3px}.grid td{background:#fff;outline:none}.grid td.selected{box-shadow:inset 0 0 0 2px #16834a;background:#f4fbf6}.grid td:focus{outline:none}.grid td.bold{font-weight:700}.grid td.italic{font-style:italic}.grid td.underline{text-decoration:underline}.grid td.merge-placeholder{color:transparent}.sheet-tabs{display:flex;gap:3px;padding:8px;background:#f7f9fa;border-top:1px solid var(--line);flex-wrap:wrap}.sheet-tabs button.active{border-bottom:3px solid var(--green);font-weight:700;color:var(--green)}.side{background:white;border:1px solid #d6dfe4;border-radius:8px;overflow:hidden}.side h2{margin:0;background:var(--green2);color:white;font-size:17px;padding:13px}.lesson{padding:13px;border-bottom:1px solid #e4e9ed}.lesson h3{margin:0 0 6px;font-size:14px;color:#145b3b}.lesson p,.lesson li{font-size:13px;line-height:1.45}.lesson p{margin:5px 0}.lesson ol,.lesson ul{padding-left:19px;margin:6px 0}.callout{background:#eef7f0;border-left:4px solid var(--green);padding:9px;margin:8px 0;font-size:13px;line-height:1.45}.bottom{padding:10px 14px;color:#526170;font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.status{color:var(--green);font-weight:700}.exercisebar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;background:#eaf2ed;border-top:1px solid #d2e2d8}.exercisebar button{flex:1;min-width:150px}.primary{background:var(--green);color:white;border-color:var(--green)}.primary:hover{background:#0b6635;color:white}.modal{position:fixed;inset:0;background:#0c1b15aa;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}.modal.show{display:flex}.modal-card{background:white;border-radius:10px;max-width:620px;width:100%;max-height:90vh;overflow:auto;padding:22px}.modal-card h2{margin-top:0}.modal-card p,.modal-card li{line-height:1.55}.close{float:right}.hint{font-size:12px;color:#617080}.small{font-size:12px}.formula-examples{display:flex;gap:6px;flex-wrap:wrap}.formula-examples button{font-family:Consolas,monospace}.grade{background:#eaf2fb!important}.invoice-title{background:#194f7a!important;color:white!important;font-weight:bold;text-align:center}.section-cell{background:#e5eff8!important;font-weight:bold}.total-cell{background:#d9eadf!important;font-weight:bold}
+@media(max-width:900px){.workspace{grid-template-columns:1fr}.side{order:2}.grid-wrap{max-height:55vh}.toolbar{position:static}} 
+</style>
+</head>
+<body>
+<header class="top"><div class="logo">X</div><strong>Excel paso a paso</strong><span>Laboratorio interactivo para aprender haciendo</span></header>
+<nav class="toolbar" aria-label="Herramientas de formato">
+  <div class="group"><label>Fuente</label><select id="fontName" title="Tipo de letra"><option>Arial</option><option>Calibri</option><option>Segoe UI</option><option>Times New Roman</option><option>Georgia</option><option>Courier New</option></select><select id="fontSize" title="Tamaño"><option>10</option><option>11</option><option selected>12</option><option>14</option><option>16</option><option>18</option><option>24</option></select><button id="boldBtn" title="Negrita"><b>B</b></button><button id="italicBtn" title="Cursiva"><i>I</i></button><button id="underBtn" title="Subrayado"><u>U</u></button></div>
+  <div class="group"><label>Color</label><input type="color" id="textColor" value="#1d2939" title="Color de texto"><label>Relleno</label><input type="color" id="fillColor" value="#ffffff" title="Color de relleno"></div>
+  <div class="group"><label>Alineación</label><button data-align="left" title="Alinear a la izquierda">☰←</button><button data-align="center" title="Centrar">☰</button><button data-align="right" title="Alinear a la derecha">→☰</button><button data-valign="top" title="Arriba">↑</button><button data-valign="middle" title="Centrar vertical">↕</button><button data-valign="bottom" title="Abajo">↓</button><button id="wrapBtn" title="Ajustar texto">Ajustar texto</button><button id="rotateBtn" title="Orientación del texto">↗ Texto</button></div>
+  <div class="group"><label>Formato de número</label><select id="numFormat"><option value="general">General</option><option value="currency">Moneda ($)</option><option value="percent">Porcentaje</option><option value="number">Número (2 dec.)</option></select><button id="borderBtn">▦ Bordes</button><button id="mergeBtn">Combinar y centrar</button></div>
+  <div class="group"><label>Filas/columnas</label><button id="addRowBtn">+ Fila</button><button id="addColBtn">+ Columna</button><button id="clearBtn">Limpiar formato</button></div>
+</nav>
+<main class="workspace">
+<section class="sheet-panel">
+  <div class="formula-bar"><div class="namebox" id="cellName">A1</div><span class="fx">fx</span><input class="formula" id="formulaInput" aria-label="Contenido o fórmula de la celda" placeholder="Escribe un valor o fórmula, por ejemplo =SUMA(B2:B5)"><button id="applyFormula">✓</button></div>
+  <div class="grid-wrap"><table class="grid" id="grid" aria-label="Hoja de cálculo interactiva"></table></div>
+  <div class="sheet-tabs"><button class="active" data-sheet="inicio">Inicio</button><button data-sheet="factura">Factura</button><button data-sheet="boleta">Boleta de calificaciones</button><button data-sheet="ejercicios">Ejercicios</button></div>
+  <div class="exercisebar"><button data-sheet="factura">📄 Practicar: formato empresarial / factura</button><button data-sheet="boleta">🎓 Practicar: boleta y promedio</button><button data-sheet="ejercicios">∑ Practicar: sumas y funciones</button><button id="resetBtn">↻ Reiniciar hoja actual</button></div>
+  <div class="bottom"><span id="statusText" class="status">Listo. Selecciona una celda para comenzar.</span><span id="selectionInfo">Selecciona una celda</span></div>
+</section>
+<aside class="side">
+<h2>Aprende Excel paso a paso</h2>
+<section class="lesson"><h3>1. Celdas, filas, columnas y rangos</h3><p>Una <b>celda</b> es una casilla. Las columnas usan letras (A, B, C) y las filas números (1, 2, 3). <b>A1</b> significa columna A, fila 1.</p><div class="callout">Un rango es un grupo de celdas. <b>A1:C3</b> va desde A1 hasta C3.</div><button data-help="celdas">Practicar selección</button></section>
+<section class="lesson"><h3>2. Formato de celdas</h3><ul><li>Tipo y tamaño de letra.</li><li>Negrita, cursiva y subrayado.</li><li>Color de texto y relleno.</li><li>Bordes y formato de moneda, número o porcentaje.</li></ul><p>Selecciona una celda y prueba las herramientas superiores.</p></section>
+<section class="lesson"><h3>3. Posición del texto</h3><ul><li>Alineación horizontal: izquierda, centro o derecha.</li><li>Alineación vertical: arriba, medio o abajo.</li><li>Ajustar texto para mostrar frases largas.</li><li>Orientación para girar el texto.</li><li>Combinar y centrar para crear títulos.</li></ul><div class="callout">Consejo: combina celdas solo cuando tenga sentido, por ejemplo para el título de una factura.</div></section>
+<section class="lesson"><h3>4. Fórmulas y funciones</h3><p>Las fórmulas comienzan con <b>=</b>. Puedes escribirlas en una celda o en la barra de fórmulas.</p><div class="formula-examples"><button data-formula="=SUMA(B2:B5)">=SUMA(B2:B5)</button><button data-formula="=PROMEDIO(B2:B5)">=PROMEDIO(B2:B5)</button><button data-formula="=MAX(B2:B5)">=MAX(B2:B5)</button><button data-formula="=MIN(B2:B5)">=MIN(B2:B5)</button></div><p class="hint">También puedes usar +, -, * y /; por ejemplo =B2*C2.</p></section>
+<section class="lesson"><h3>5. Documentos profesionales</h3><p>Practica el diseño de una factura y una boleta: títulos, encabezados, datos ordenados, bordes, totales y promedios.</p><button class="primary" data-sheet="factura">Abrir factura</button> <button data-sheet="boleta">Abrir boleta</button></section>
+<section class="lesson"><h3>Reto rápido</h3><ol><li>Combina A1:D1 y escribe un título.</li><li>Pon el título en negrita, centrado y con relleno.</li><li>Agrega bordes a una tabla.</li><li>Calcula un total con SUMA.</li><li>Calcula un promedio con PROMEDIO.</li></ol><button id="showRubric">Ver guía de la clase</button></section>
+</aside>
+</main>
+<div class="modal" id="modal"><div class="modal-card"><button class="close" id="closeModal">Cerrar ✕</button><div id="modalContent"></div></div></div>
+<script>
+const ROWS=24,COLS=10;
+let currentSheet='inicio', selected={r:0,c:0}, data={}, styles={}, merged={}, formulaValues={}, rangeStart=null, wrapOn=false, rotateOn=false;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const key=(r,c)=>`${r},${c}`, colName=n=>{let s='';n++;while(n){let m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s};
+function initSheet(name){data[name]={};styles[name]={};merged[name]={};}
+['inicio','factura','boleta','ejercicios'].forEach(initSheet);
+function setCell(sheet,r,c,v,st={}){data[sheet][key(r,c)]=v;if(Object.keys(st).length)styles[sheet][key(r,c)]={...(styles[sheet][key(r,c)]||{}),...st};}
+function setRow(sheet,r,vals,st={}){vals.forEach((v,c)=>setCell(sheet,r,c,v,st));}
+function seed(){
+ let s='inicio';
+ setCell(s,0,0,'¡Bienvenida/o a Excel!',{bold:true,fontSize:20,color:'#ffffff',fill:'#185c37',align:'center'});
+ for(let c=1;c<6;c++)setCell(s,0,c,'',{fill:'#185c37'});
+ setCell(s,2,0,'Objetivo de hoy:',{bold:true,color:'#185c37',fontSize:14});setCell(s,2,1,'Crear documentos claros y calcular resultados.');
+ setCell(s,4,0,'Concepto',{bold:true,fill:'#dcefe3',align:'center',border:true});setCell(s,4,1,'¿Para qué sirve?',{bold:true,fill:'#dcefe3',align:'center',border:true});
+ [['Celda','Guardar un dato en una casilla.'],['Formato','Hacer que los datos se vean claros.'],['Fórmula','Calcular resultados automáticamente.'],['Rango','Trabajar con varias celdas a la vez.']].forEach((x,i)=>{setCell(s,5+i,0,x[0],{border:true});setCell(s,5+i,1,x[1],{border:true,wrap:true});});
+ setCell(s,11,0,'Prueba esto',{bold:true,fill:'#fff2cc'});setCell(s,12,0,'1. Selecciona B6');setCell(s,13,0,'2. Cambia el color de relleno');setCell(s,14,0,'3. Centra el texto y ponlo en negrita');
+ s='factura';setCell(s,0,0,'MI EMPRESA',{bold:true,fontSize:18,color:'#ffffff',fill:'#194f7a',align:'center'});for(let c=1;c<6;c++)setCell(s,0,c,'',{fill:'#194f7a'});
+ setCell(s,1,0,'Soluciones que impulsan tu negocio',{italic:true,color:'#536273'});setCell(s,2,0,'FACTURA',{bold:true,fontSize:20,color:'#ffffff',fill:'#194f7a',align:'center'});for(let c=1;c<6;c++)setCell(s,2,c,'',{fill:'#194f7a'});
+ setCell(s,2,6,'Folio: F-001',{bold:true});setCell(s,3,6,'Fecha: 02/10/2026');
+ setCell(s,4,0,'DATOS DEL CLIENTE',{bold:true,fill:'#dceaf7'});setCell(s,4,5,'DATOS DE LA EMPRESA',{bold:true,fill:'#dceaf7'});
+ setCell(s,5,0,'Nombre:');setCell(s,5,1,'Cliente Ejemplo');setCell(s,5,5,'Nombre:');setCell(s,5,6,'Mi Empresa S.A.');
+ setCell(s,6,0,'RFC:');setCell(s,6,1,'XAXX010101000');setCell(s,6,5,'RFC:');setCell(s,6,6,'AAA010101AAA');
+ setCell(s,7,0,'Dirección:');setCell(s,7,1,'Ciudad de México');setCell(s,7,5,'Dirección:');setCell(s,7,6,'Dirección de la empresa');
+ ['Descripción','Cantidad','Precio unitario','Importe'].forEach((v,i)=>setCell(s,9,i,v,{bold:true,fill:'#194f7a',color:'#ffffff',align:'center',border:true}));
+ [['Servicio de diseño',1,1500,'=B11*C11'],['Capacitación Excel',2,800,'=B12*C12'],['Material de apoyo',3,120,'=B13*C13'],['Soporte técnico',1,500,'=B14*C14']].forEach((row,i)=>row.forEach((v,c)=>setCell(s,10+i,c,v,{border:true,align:c>0?'right':'left'})));
+ setCell(s,15,2,'Subtotal',{bold:true,fill:'#dceaf7',align:'right',border:true});setCell(s,15,3,'=SUM(D11:D14)',{bold:true,border:true});
+ setCell(s,16,2,'IVA 16%',{bold:true,fill:'#dceaf7',align:'right',border:true});setCell(s,16,3,'=D16*16%',{border:true});
+ setCell(s,17,2,'TOTAL',{bold:true,color:'#ffffff',fill:'#194f7a',align:'right',border:true});setCell(s,17,3,'=D16+D17',{bold:true,color:'#ffffff',fill:'#194f7a',border:true});
+ setCell(s,19,0,'Notas:',{bold:true});setCell(s,20,0,'Gracias por su preferencia.');setCell(s,22,0,'Atentamente, Mi Empresa',{italic:true});
+ s='boleta';setCell(s,0,0,'BOLETA DE CALIFICACIONES',{bold:true,fontSize:18,color:'#ffffff',fill:'#185c37',align:'center'});for(let c=1;c<5;c++)setCell(s,0,c,'',{fill:'#185c37'});
+ setCell(s,2,0,'Estudiante:');setCell(s,2,1,'Andrea López');setCell(s,3,0,'Grupo:');setCell(s,3,1,'1° A');setCell(s,3,3,'Periodo:');setCell(s,3,4,'Primer parcial');
+ setRow(s,5,['Asignatura','Actividad 1','Actividad 2','Examen','Promedio'],{bold:true,fill:'#dcefe3',align:'center',border:true});
+ [['Informática',9,10,9,'=PROMEDIO(B7:D7)'],['Administración',8,9,10,'=PROMEDIO(B8:D8)'],['Matemáticas',7,8,9,'=PROMEDIO(B9:D9)'],['Comunicación',10,9,10,'=PROMEDIO(B10:D10)'],['Inglés',8,8,7,'=PROMEDIO(B11:D11)']].forEach((row,i)=>row.forEach((v,c)=>setCell(s,6+i,c,v,{border:true,align:c?'center':'left'})));
+ setCell(s,12,0,'Promedio general',{bold:true,fill:'#dcefe3',border:true});setCell(s,12,4,'=PROMEDIO(E7:E11)',{bold:true,fill:'#dcefe3',border:true,align:'center'});
+ setCell(s,14,0,'Reto: cambia una calificación y observa cómo cambia el promedio.',{italic:true,color:'#185c37'});
+ s='ejercicios';setCell(s,0,0,'LABORATORIO DE FÓRMULAS',{bold:true,fontSize:18,color:'#ffffff',fill:'#185c37',align:'center'});for(let c=1;c<5;c++)setCell(s,0,c,'',{fill:'#185c37'});
+ setRow(s,2,['Producto','Cantidad','Precio','Importe','IVA (16%)','Total'],{bold:true,fill:'#dcefe3',align:'center',border:true});
+ [['Cuaderno',4,25,'=B4*C4','=D4*16%','=D4+E4'],['Pluma',10,8,'=B5*C5','=D5*16%','=D5+E5'],['Carpeta',3,35,'=B6*C6','=D6*16%','=D6+E6'],['Mochila',1,450,'=B7*C7','=D7*16%','=D7+E7']].forEach((row,i)=>row.forEach((v,c)=>setCell(s,3+i,c,v,{border:true,align:c?'right':'left'})));
+ setCell(s,8,0,'Total de ventas',{bold:true,fill:'#dcefe3',border:true});setCell(s,8,5,'=SUM(F4:F7)',{bold:true,fill:'#dcefe3',border:true});
+ setCell(s,10,0,'Mayor venta',{bold:true});setCell(s,10,1,'=MAX(F4:F7)');setCell(s,11,0,'Venta menor',{bold:true});setCell(s,11,1,'=MIN(F4:F7)');setCell(s,12,0,'Promedio de ventas',{bold:true});setCell(s,12,1,'=PROMEDIO(F4:F7)');
+}
+seed();
+function parseRef(ref){let m=ref.match(/^([A-Z]+)(\d+)$/i);if(!m)return null;let c=0;for(let x of m[1].toUpperCase())c=c*26+x.charCodeAt(0)-64;return{r:+m[2]-1,c:c-1}}
+function getRaw(r,c){return data[currentSheet][key(r,c)]??''}
+function evalCell(r,c,stack=new Set()){
+ let k=key(r,c),raw=data[currentSheet][k];if(raw===undefined||raw==='')return 0;
+ if(typeof raw==='number')return raw;
+ if(typeof raw==='string'&&raw.startsWith('=')){if(stack.has(k))return '#CICLO!';stack.add(k);let result=evalFormula(raw,stack);stack.delete(k);return result}
+ if(typeof raw==='string'){let n=Number(raw.replace(/[$,%\s,]/g,''));return raw.trim()!==''&&!Number.isNaN(n)?n:raw}
+ return raw;
+}
+function evalFormula(f,stack=new Set()){
+ try{
+  let exp=f.slice(1).trim().toUpperCase();
+  const rangeVals=range=>{let m=range.match(/^([A-Z]+\d+):([A-Z]+\d+)$/);if(!m)return [0];let a=parseRef(m[1]),b=parseRef(m[2]),v=[];for(let r=Math.min(a.r,b.r);r<=Math.max(a.r,b.r);r++)for(let c=Math.min(a.c,b.c);c<=Math.max(a.c,b.c);c++){let x=evalCell(r,c,stack);if(typeof x==='number')v.push(x);else if(x!=='') {let n=Number(x);if(!Number.isNaN(n))v.push(n)}}return v};
+  let m=exp.match(/^(SUMA|SUM|PROMEDIO|AVERAGE|MAX|MIN|CONTAR|COUNT)\(([^)]+)\)$/);
+  if(m){let vals=m[2].split(',').flatMap(x=>x.includes(':')?rangeVals(x):[evalRef(x,stack)]).filter(x=>typeof x==='number'&&!Number.isNaN(x));switch(m[1]){case'SUMA':case'SUM':return vals.reduce((a,b)=>a+b,0);case'PROMEDIO':case'AVERAGE':return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;case'MAX':return vals.length?Math.max(...vals):0;case'MIN':return vals.length?Math.min(...vals):0;default:return vals.length}}
+  exp=exp.replace(/([A-Z]+\d+)/g,(match)=>{let v=evalRef(match,stack);return typeof v==='number'?`(${v})`:'0'});
+  if(!/^[0-9+\-*/().%\s]+$/.test(exp))return '#ERROR';
+  return Function('"use strict";return ('+exp.replace(/(\d+(?:\.\d+)?)%/g,'($1/100)')+')')();
+ }catch(e){return '#ERROR'}
+}
+function evalRef(ref,stack){let p=parseRef(ref);return p?evalCell(p.r,p.c,stack):0}
+function displayVal(v,fmt='general'){if(typeof v==='string'&&v.startsWith('='))v=0;if(typeof v==='number'){if(fmt==='currency')return v.toLocaleString('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:2});if(fmt==='percent')return (v*100).toLocaleString('es-MX',{maximumFractionDigits:2})+'%';if(fmt==='number')return v.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});return Number.isInteger(v)?String(v):v.toLocaleString('es-MX',{maximumFractionDigits:2})}return v===undefined?'':String(v)}
+function cellStyle(r,c){return styles[currentSheet][key(r,c)]||{}}
+function render(){
+ const table=$('#grid');table.innerHTML='';let thead=document.createElement('thead'),hr=document.createElement('tr');let corner=document.createElement('th');corner.className='corner';corner.textContent='';hr.append(corner);
+ for(let c=0;c<COLS;c++){let th=document.createElement('th');th.textContent=colName(c);hr.append(th)}thead.append(hr);table.append(thead);
+ let tbody=document.createElement('tbody');
+ for(let r=0;r<ROWS;r++){let tr=document.createElement('tr'),rh=document.createElement('th');rh.className='rowhead';rh.textContent=r+1;tr.append(rh);
+ for(let c=0;c<COLS;c++){let td=document.createElement('td');td.dataset.r=r;td.dataset.c=c;td.contentEditable='true';td.spellcheck=false;let raw=getRaw(r,c),st=cellStyle(r,c);let val=raw;
+ if(typeof raw==='string'&&raw.startsWith('=')){val=evalCell(r,c);if(typeof val==='number'&&!Number.isFinite(val))val='#ERROR';}
+ td.textContent=displayVal(val,st.numFormat||'general');td.style.fontFamily=st.fontName||'Calibri';td.style.fontSize=(st.fontSize||12)+'px';td.style.color=st.color||'';td.style.background=st.fill||'';td.style.textAlign=st.align||'';td.style.verticalAlign=st.valign||'middle';td.style.whiteSpace=st.wrap?'pre-wrap':'nowrap';td.style.height=st.height||'';if(st.bold)td.classList.add('bold');if(st.italic)td.classList.add('italic');if(st.underline)td.classList.add('underline');if(st.border)td.style.border='1px solid #8da1b2';if(st.rotate)td.style.writingMode='vertical-rl';if(st.mergeHidden)td.style.display='none';if(st.colSpan)td.colSpan=st.colSpan;if(st.rowSpan)td.rowSpan=st.rowSpan;
+ if(r===selected.r&&c===selected.c)td.classList.add('selected');td.addEventListener('click',e=>{if(e.shiftKey&&rangeStart){selectRange(rangeStart,{r,c});return}selected={r,c};rangeStart={r,c};syncSelection();render();});td.addEventListener('focus',()=>{selected={r,c};syncSelection()});td.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commitCell(r,c,td.innerText);selected={r:Math.min(ROWS-1,r+1),c};render();syncSelection()}if(e.key==='Tab'){e.preventDefault();commitCell(r,c,td.innerText);selected={r,c:Math.min(COLS-1,c+1)};render();syncSelection()}});td.addEventListener('blur',()=>{let now=td.innerText;if(now!==displayVal(raw))commitCell(r,c,now)});tr.append(td)}
+ tbody.append(tr)}table.append(tbody);syncSelection();updateTabs();
+}
+function selectRange(a,b){let r1=Math.min(a.r,b.r),r2=Math.max(a.r,b.r),c1=Math.min(a.c,b.c),c2=Math.max(a.c,b.c);$$('#grid td').forEach(td=>{let r=+td.dataset.r,c=+td.dataset.c;td.classList.toggle('selected',r>=r1&&r<=r2&&c>=c1&&c<=c2)});selected={...b};$('#cellName').textContent=`${colName(c1)}${r1+1}:${colName(c2)}${r2+1}`;$('#selectionInfo').textContent=`Rango ${colName(c1)}${r1+1}:${colName(c2)}${r2+1}`;}
+function syncSelection(){let raw=getRaw(selected.r,selected.c);$('#cellName').textContent=colName(selected.c)+(selected.r+1);$('#formulaInput').value=raw??'';$('#selectionInfo').textContent=`Celda ${colName(selected.c)}${selected.r+1} · ${typeof evalCell(selected.r,selected.c)==='number'?'Valor: '+displayVal(evalCell(selected.r,selected.c)):'Texto'}`;}
+function commitCell(r,c,value){value=String(value).trimEnd();if(value==='')delete data[currentSheet][key(r,c)];else if(value.startsWith('='))data[currentSheet][key(r,c)]=value;else if(!Number.isNaN(Number(value))&&value.trim()!=='')data[currentSheet][key(r,c)]=Number(value);else data[currentSheet][key(r,c)]=value;$('#statusText').textContent='Celda actualizada.';render();}
+function updateTabs(){$$('.sheet-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.sheet===currentSheet))}
+function changeSheet(name){currentSheet=name;selected={r:0,c:0};rangeStart=null;render();$('#statusText').textContent='Hoja: '+({inicio:'Inicio',factura:'Factura',boleta:'Boleta de calificaciones',ejercicios:'Ejercicios'}[name]);}
+function selectionKeys(){let name=$('#cellName').textContent;if(name.includes(':')){let [a,b]=name.split(':').map(parseRef);let out=[];for(let r=Math.min(a.r,b.r);r<=Math.max(a.r,b.r);r++)for(let c=Math.min(a.c,b.c);c<=Math.max(a.c,b.c);c++)out.push(key(r,c));return out}return[key(selected.r,selected.c)]}
+function applyStyle(patch){selectionKeys().forEach(k=>styles[currentSheet][k]={...(styles[currentSheet][k]||{}),...patch});render();$('#statusText').textContent='Formato aplicado.'}
+$('#applyFormula').onclick=()=>{commitCell(selected.r,selected.c,$('#formulaInput').value)};
+$('#formulaInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('#applyFormula').click()});
+$('#fontName').onchange=e=>applyStyle({fontName:e.target.value});$('#fontSize').onchange=e=>applyStyle({fontSize:+e.target.value});
+$('#boldBtn').onclick=()=>applyStyle({bold:!cellStyle(selected.r,selected.c).bold});$('#italicBtn').onclick=()=>applyStyle({italic:!cellStyle(selected.r,selected.c).italic});$('#underBtn').onclick=()=>applyStyle({underline:!cellStyle(selected.r,selected.c).underline});
+$('#textColor').oninput=e=>applyStyle({color:e.target.value});$('#fillColor').oninput=e=>applyStyle({fill:e.target.value});
+$$('[data-align]').forEach(b=>b.onclick=()=>applyStyle({align:b.dataset.align}));$$('[data-valign]').forEach(b=>b.onclick=()=>applyStyle({valign:b.dataset.valign}));
+$('#wrapBtn').onclick=()=>{wrapOn=!wrapOn;applyStyle({wrap:wrapOn,height:wrapOn?'58px':''})};$('#rotateBtn').onclick=()=>{rotateOn=!rotateOn;applyStyle({rotate:rotateOn})};
+$('#numFormat').onchange=e=>applyStyle({numFormat:e.target.value});
+$('#borderBtn').onclick=()=>applyStyle({border:true});
+$('#mergeBtn').onclick=()=>{let keys=selectionKeys();if(keys.length<2){showModal('<h2>Combinar y centrar</h2><p>Primero selecciona un rango: haz clic en una celda y luego usa <b>Shift + clic</b> en otra celda para seleccionar un rango.</p>');return}let refs=$('#cellName').textContent.split(':');let a=parseRef(refs[0]),b=parseRef(refs[1]||refs[0]);let r1=Math.min(a.r,b.r),r2=Math.max(a.r,b.r),c1=Math.min(a.c,b.c),c2=Math.max(a.c,b.c);let first=data[currentSheet][key(r1,c1)]??'';for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++){if(r===r1&&c===c1)continue;delete data[currentSheet][key(r,c)];styles[currentSheet][key(r,c)]={...(styles[currentSheet][key(r,c)]||{}),mergeHidden:true}}styles[currentSheet][key(r1,c1)]={...(styles[currentSheet][key(r1,c1)]||{}),colSpan:c2-c1+1,align:'center',bold:true};data[currentSheet][key(r1,c1)]=first;render();$('#statusText').textContent='Rango combinado visualmente. (Práctica de diseño)';};
+$('#addRowBtn').onclick=()=>{let r=selected.r;Object.keys(data[currentSheet]).forEach(k=>{let [rr,cc]=k.split(',').map(Number);if(rr>=r)data[currentSheet][key(rr+1,cc)]=data[currentSheet][k],delete data[currentSheet][k]});Object.keys(styles[currentSheet]).forEach(k=>{let [rr,cc]=k.split(',').map(Number);if(rr>=r)styles[currentSheet][key(rr+1,cc)]=styles[currentSheet][k],delete styles[currentSheet][k]});render();$('#statusText').textContent='Fila insertada.'};
+$('#addColBtn').onclick=()=>{let c=selected.c;Object.keys(data[currentSheet]).forEach(k=>{let [rr,cc]=k.split(',').map(Number);if(cc>=c)data[currentSheet][key(rr,cc+1)]=data[currentSheet][k],delete data[currentSheet][k]});Object.keys(styles[currentSheet]).forEach(k=>{let [rr,cc]=k.split(',').map(Number);if(cc>=c)styles[currentSheet][key(rr,cc+1)]=styles[currentSheet][k],delete styles[currentSheet][k]});render();$('#statusText').textContent='Columna insertada.'};
+$('#clearBtn').onclick=()=>{selectionKeys().forEach(k=>delete styles[currentSheet][k]);render();$('#statusText').textContent='Formato quitado; contenido conservado.'};
+$$('[data-sheet]').forEach(b=>b.addEventListener('click',()=>changeSheet(b.dataset.sheet)));
+$$('[data-formula]').forEach(b=>b.onclick=()=>{$('#formulaInput').value=b.dataset.formula;$('#formulaInput').focus()});
+function showModal(content){$('#modalContent').innerHTML=content;$('#modal').classList.add('show')}
+$('#closeModal').onclick=()=>$('#modal').classList.remove('show');$('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('show')};
+$$('[data-help]').forEach(b=>b.onclick=()=>showModal('<h2>Práctica: celdas y rangos</h2><ol><li>Haz clic en A1: el cuadro de nombre muestra la referencia.</li><li>Escribe un dato en la barra de fórmulas y pulsa ✓.</li><li>Para seleccionar un rango, haz clic en una celda y luego mantén <b>Shift</b> mientras haces clic en otra.</li><li>Aplica relleno, negrita o alineación al rango seleccionado.</li></ol><p>Recuerda: A1:C3 contiene 9 celdas.</p>'));
+$('#showRubric').onclick=()=>showModal('<h2>Guía para la clase</h2><p><b>Meta:</b> que el alumno diseñe una tabla empresarial legible y haga cálculos básicos.</p><ol><li>Identifica celdas, filas, columnas y rangos.</li><li>Escribe y edita datos con la barra de fórmulas.</li><li>Aplica fuente, tamaño, negrita, colores, bordes y formatos numéricos.</li><li>Practica alineación horizontal/vertical, ajuste y combinación.</li><li>Usa operadores aritméticos, SUMA, PROMEDIO, MAX y MIN.</li><li>Entrega una factura o boleta clara y ordenada.</li></ol><p><b>Evaluación sugerida (10 puntos):</b> estructura 2, formato 3, alineación y legibilidad 2, fórmulas correctas 3.</p><p class="hint">Nota docente: esta es una simulación educativa, no Microsoft Excel. Las funciones básicas se evalúan localmente y algunos comportamientos avanzados de Excel pueden diferir.</p>');
+$('#resetBtn').onclick=()=>{if(confirm('¿Reiniciar esta hoja y perder los cambios?')){let old=currentSheet;delete data[old];delete styles[old];delete merged[old];initSheet(old);seed();changeSheet(old)}};
+document.addEventListener('keydown',e=>{if(e.target.isContentEditable||['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;let r=selected.r,c=selected.c;if(e.key==='ArrowDown')r=Math.min(ROWS-1,r+1);else if(e.key==='ArrowUp')r=Math.max(0,r-1);else if(e.key==='ArrowRight')c=Math.min(COLS-1,c+1);else if(e.key==='ArrowLeft')c=Math.max(0,c-1);else return;selected={r,c};render();});
+render();
+</script>
+</body>
+</html>
